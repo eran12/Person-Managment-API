@@ -2,6 +2,7 @@ package com.ee.service;
 
 import java.util.Collection;
 
+import javax.jws.WebMethod;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -34,13 +35,13 @@ public class UserService implements UserServiceInterface{
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public User upDateUser( User user ) throws Exception {
-			System.out.println("UserService.upDateUser()");
+	public User upDateUser( User user ) {
+
 		if (user.getName() == null | user.getAddress() == null) {
-			throw new NullPointerException("Name or Adress can`t be null");
+			throw new WebApplicationException("Name or Adress can`t be null");
 		}
 		if(user.getPhone() < 0) {
-				throw new Exception("Phone must be complete");
+				throw new WebApplicationException("Phone must be complete");
 		}
 
 		UserFacade fc = new UserFacade();
@@ -50,12 +51,11 @@ public class UserService implements UserServiceInterface{
 			userUpdate.setPhone(user.getPhone());
 			fc.upDateUser(userUpdate);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new WebApplicationException(e.getMessage());
 		}
 		try {
 			user = fc.getUserById(userUpdate.getId());
 		} catch (Exception e) {
-
 			return null;
 		}
 		return user;
@@ -69,14 +69,14 @@ public class UserService implements UserServiceInterface{
 	public User addNewUser(User user)  {
 			
 		if (user.getName() == null | user.getAddress()== null) {
-			throw new NullPointerException("Name or Address can`t be null");
+			throw new WebApplicationException("Name or Address can`t be null");
 		}
 		UserFacade fc = new UserFacade();
 		try {
 			fc.addNewUser(user);
 			user = fc.getUserByName(user.getName());
 		} catch (Exception e) {
-				throw new WebApplicationException(e);
+				throw new WebApplicationException(e.getMessage());
 		}
 		return user;
 	}
@@ -87,12 +87,12 @@ public class UserService implements UserServiceInterface{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String deleteUser(User user) {
-		System.out.println("UserService.deleteUser()" + user);
+		
 		try {
 			if (user.getName() == null) {
-				throw new Exception("User can`t be null");
+				throw new WebApplicationException("User can`t be null");
 			} else if (user.getId() < 0 ) {
-				throw new Exception("Id can`t be less then zero");
+				throw new WebApplicationException("Id can`t be less then zero");
 			}else{
 			UserFacade fc = new UserFacade();
 			
@@ -100,16 +100,12 @@ public class UserService implements UserServiceInterface{
 			if(user == null){
 				return "User does not exsis";
 			}else {
-				String s2 = fc.deleteUser(user);
-				System.out.println(s2);
-				return s2;
+				return fc.deleteUser(user);
 			}
 			}
 		} catch (Exception e) {
-			e.getMessage();
-
+			throw new WebApplicationException(e.getMessage());
 		}
-		return null;
 	}
 
 	@Override
@@ -118,18 +114,16 @@ public class UserService implements UserServiceInterface{
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	public User getUserById(@QueryParam("id") long id) {
-		System.out.println("UserService.getUserById()");
 		try{
 			if(id < 0){
-				throw new Exception("Id can`t be less then zero");
+				throw new WebApplicationException("Id can`t be less then zero");
 			}else{
 				UserFacade fc = new UserFacade();
 				return fc.getUserById(id);
 			}
 		}catch (Exception e) {
-			e.getMessage();
+			throw new WebApplicationException(e.getMessage());
 		}
-		return null;
 	}
 
 	@Override
@@ -137,8 +131,8 @@ public class UserService implements UserServiceInterface{
 	@GET
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
+	@WebMethod(exclude = true)
 	public User getUserByName(@QueryParam("name") String name) {
-		System.out.println("UserService.getUserByName()");
 		if(name == null){
 			return null;
 		}

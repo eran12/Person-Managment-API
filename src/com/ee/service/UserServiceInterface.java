@@ -16,7 +16,7 @@ public interface UserServiceInterface {
 
 	public String deleteUser(User user);
 
-	public User upDateUser(User user) throws Exception;
+	public User upDateUser(User user);
 
 	
 }
